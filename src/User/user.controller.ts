@@ -13,13 +13,7 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UserService } from './user.service';
-import {
-  ApiOperation,
-  ApiTags,
-  ApiResponse,
-  ApiParam,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
 @Controller()
@@ -36,7 +30,7 @@ export class UserController {
   async putUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Query() query: UserDTO.CreateUserDTO,
+    @Query() query: UserDTO.PutUserReqDTO,
   ) {
     const result = await this.userService.putUser(
       // req.headers.authorization,
@@ -50,7 +44,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 아이디 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserDTO.FindUserResDTO,
+    type: UserDTO.GetUserResDTO,
     description: '',
   })
   @ApiParam({
@@ -71,7 +65,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 전체 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserDTO.FindUsersResDTO,
+    type: UserDTO.GetUsersResDTO,
     description: '',
   })
   async getUsers(@Req() req: Request, @Res() res: Response) {
@@ -83,7 +77,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 정보 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserDTO.FindUsersResDTO,
+    type: '',
     description: '',
   })
   @ApiParam({
@@ -101,7 +95,7 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Delete('users/:userId')
+  @Delete('user/:userId')
   @ApiOperation({ summary: '유저 아이디 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,

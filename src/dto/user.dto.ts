@@ -1,11 +1,11 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { UserDTO } from 'src/dto/model.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { UserDTO } from './model.dto';
 
-export class CreateUserDTO extends UserDTO {}
+export class PutUserReqDTO extends UserDTO {}
 
-export class FindUserResDTO extends UserDTO {}
+export class GetUserResDTO extends UserDTO {}
 
-export class FindUsersResDTO {
+export class GetUsersResDTO {
   @ApiProperty({ description: '등록된 유저 인원 수' })
   total: number;
   @ApiProperty({ type: UserDTO, isArray: true, description: '유저 전체 조회' })

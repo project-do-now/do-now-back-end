@@ -6,8 +6,8 @@ import * as UserDTO from 'src/dto/user.dto';
 export class UserService {
   private users: ModelDTO.UserDTO[] = [];
 
-  async putUser(createUserDTO: UserDTO.CreateUserDTO) {
-    const result = new ModelDTO.ResponseDto();
+  async putUser(createUserDTO: UserDTO.PutUserReqDTO) {
+    const result = new ModelDTO.ResponseDTO();
 
     const findUser = this.users.find((value) => value.id === createUserDTO.id);
 
@@ -24,8 +24,8 @@ export class UserService {
   }
 
   async getUser(userId: string) {
-    const result = new ModelDTO.ResponseDto();
-    const user = new UserDTO.FindUserResDTO();
+    const result = new ModelDTO.ResponseDTO();
+    const user = new UserDTO.GetUserResDTO();
 
     const findUser = this.users.find((value) => value.id === userId) ?? null;
 
@@ -51,9 +51,9 @@ export class UserService {
   }
 
   async getUsers() {
-    const result = new ModelDTO.ResponseDto();
+    const result = new ModelDTO.ResponseDTO();
 
-    const users = new UserDTO.FindUsersResDTO();
+    const users = new UserDTO.GetUsersResDTO();
 
     users.total = this.users.length;
     users.users = this.users;
@@ -69,7 +69,7 @@ export class UserService {
     userId: string,
     updateUserBodyDTO: UserDTO.UpdateUserBodyDTO,
   ) {
-    const result = new ModelDTO.ResponseDto();
+    const result = new ModelDTO.ResponseDTO();
 
     const findUser = this.users.find((value) => value.id === userId);
 
@@ -103,7 +103,7 @@ export class UserService {
   }
 
   async deleteUser(userId: string) {
-    const result = new ModelDTO.ResponseDto();
+    const result = new ModelDTO.ResponseDTO();
 
     const user = this.users.find((value) => value.id === userId);
 
