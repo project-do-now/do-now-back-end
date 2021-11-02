@@ -8,10 +8,17 @@ export class UserService {
 
   async putUser(createUserDTO: UserDTO.CreateUserDTO) {
     const result = new ModelDTO.ResponseDto();
-    this.users.push(createUserDTO);
+
+    const findUser = this.users.find((value) => value.id === createUserDTO.id);
+
+    if (findUser) {
+      result.message = '[Error] Try another User Id.';
+    } else {
+      this.users.push(createUserDTO);
+      result.message = 'User Create Success.';
+    }
 
     result.code = HttpStatus.CREATED;
-    result.message = 'User Create Success.';
     result.payload = null;
     return result;
   }
