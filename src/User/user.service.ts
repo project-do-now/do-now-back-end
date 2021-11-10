@@ -13,13 +13,14 @@ export class UserService {
 
     if (findUser) {
       result.message = '[Error] Try another User Id.';
+      result.payload = findUser;
     } else {
       this.users.push(createUserDTO);
       result.message = 'User Create Success.';
+      result.payload = createUserDTO;
     }
 
     result.code = HttpStatus.CREATED;
-    result.payload = null;
     return result;
   }
 
@@ -113,12 +114,12 @@ export class UserService {
       this.users = this.users.map((value) => {
         if (value.id === userId) {
           updateUser.id = userId;
-          updateUser.password = putUserBodyDTO.password;
-          updateUser.name = putUserBodyDTO.name;
-          updateUser.gender = putUserBodyDTO.gender;
-          updateUser.phoneNumber = putUserBodyDTO.phoneNumber;
-          updateUser.email = putUserBodyDTO.email;
-          updateUser.birthday = putUserBodyDTO.birthday;
+          updateUser.password = putUserBodyDTO?.password ?? null;
+          updateUser.name = putUserBodyDTO?.name ?? null;
+          updateUser.gender = putUserBodyDTO?.gender ?? null;
+          updateUser.phoneNumber = putUserBodyDTO?.phoneNumber ?? null;
+          updateUser.email = putUserBodyDTO?.email ?? null;
+          updateUser.birthday = putUserBodyDTO?.birthday ?? null;
 
           return updateUser;
         } else return value;

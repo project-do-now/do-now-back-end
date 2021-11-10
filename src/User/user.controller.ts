@@ -15,6 +15,7 @@ import {
 import { Response, Request } from 'express';
 import { UserService } from './user.service';
 import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
 @Controller()
@@ -78,7 +79,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 정보 일부 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: '',
+    type: ModelDTO.UserDTO,
     description: '',
   })
   @ApiParam({
@@ -100,7 +101,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 정보 전체 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: '',
+    type: ModelDTO.UserDTO,
     description: '',
   })
   @ApiParam({
