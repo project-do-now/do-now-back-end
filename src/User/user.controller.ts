@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -13,32 +14,27 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UserService } from './user.service';
-import {
-  ApiOperation,
-  ApiTags,
-  ApiResponse,
-  ApiParam,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Put('user')
+  @Post('user')
   @ApiOperation({ summary: '유저 정보 생성' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',
     description: '',
   })
-  async putUser(
+  async postUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Query() query: UserDTO.CreateUserDTO,
+    @Query() query: UserDTO.PostUserReqDTO,
   ) {
-    const result = await this.userService.putUser(
+    const result = await this.userService.postUser(
       // req.headers.authorization,
       query,
     );
@@ -47,10 +43,10 @@ export class UserController {
   }
 
   @Get('user/:userId')
-  @ApiOperation({ summary: '유저 아이디 조회' })
+  @ApiOperation({ summary: '유저 아이디로 단일 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserDTO.FindUserResDTO,
+    type: UserDTO.GetUserResDTO,
     description: '',
   })
   @ApiParam({
@@ -71,7 +67,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 전체 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserDTO.FindUsersResDTO,
+    type: UserDTO.GetUsersResDTO,
     description: '',
   })
   async getUsers(@Req() req: Request, @Res() res: Response) {
@@ -79,11 +75,11 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Post('user/:userId')
-  @ApiOperation({ summary: '유저 정보 업데이트' })
+  @Patch('user/:userId')
+  @ApiOperation({ summary: '유저 정보 일부 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserDTO.FindUsersResDTO,
+    type: ModelDTO.UserDTO,
     description: '',
   })
   @ApiParam({
@@ -91,17 +87,39 @@ export class UserController {
     type: 'string',
     description: '업데이트할 유저 아이디',
   })
-  async updateUser(
+  async patchUser(
     @Req() req: Request,
     @Res() res: Response,
     @Param('userId') userId: string,
-    @Body() body: UserDTO.UpdateUserBodyDTO,
+    @Query() query: UserDTO.PatchUserQueryDTO,
   ) {
-    const result = await this.userService.updateUser(userId, body);
+    const result = await this.userService.patchUSer(userId, query);
     res.status(result.code).json(result);
   }
 
-  @Delete('users/:userId')
+  @Put('user/:userId')
+  @ApiOperation({ summary: '유저 정보 전체 업데이트' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ModelDTO.UserDTO,
+    description: '',
+  })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: '업데이트할 유저 아이디',
+  })
+  async putUser(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('userId') userId: string,
+    @Body() body: UserDTO.PutUserBodyDTO,
+  ) {
+    const result = await this.userService.putUser(userId, body);
+    res.status(result.code).json(result);
+  }
+
+  @Delete('user/:userId')
   @ApiOperation({ summary: '유저 아이디 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,
