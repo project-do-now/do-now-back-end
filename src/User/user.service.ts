@@ -1,21 +1,29 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Connection } from 'typeorm';
+import { User } from 'src/entity/user.entity';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
+
   private users: ModelDTO.UserDTO[] = [];
 
   async postUser(createUserDTO: UserDTO.PostUserReqDTO) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findUser = this.users.find((value) => value.id === createUserDTO.id);
+    const findUser = await this.usersRepository.findOne(createUserDTO.id);
 
     if (findUser) {
       result.message = '[Error] Try another User Id.';
       result.payload = findUser;
     } else {
-      this.users.push(createUserDTO);
+      this.usersRepository.insert(createUserDTO);
       result.message = 'User Create Success.';
       result.payload = createUserDTO;
     }
@@ -56,8 +64,10 @@ export class UserService {
 
     const users = new UserDTO.GetUsersResDTO();
 
-    users.total = this.users.length;
-    users.users = this.users;
+    const findAllUsers = await this.usersRepository.find();
+
+    users.total = findAllUsers.length;
+    users.users = findAllUsers;
 
     result.code = HttpStatus.OK;
     result.message = '';
