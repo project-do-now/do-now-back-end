@@ -6,7 +6,7 @@ import * as UserDTO from 'src/dto/user.dto';
 export class UserService {
   private users: ModelDTO.UserDTO[] = [];
 
-  async putUser(createUserDTO: UserDTO.PutUserReqDTO) {
+  async postUser(createUserDTO: UserDTO.PostUserReqDTO) {
     const result = new ModelDTO.ResponseDTO();
 
     const findUser = this.users.find((value) => value.id === createUserDTO.id);
@@ -65,39 +65,73 @@ export class UserService {
     return result;
   }
 
-  async updateUser(
+  async patchUSer(
     userId: string,
-    updateUserBodyDTO: UserDTO.UpdateUserBodyDTO,
+    patchUserQeuryDTO: UserDTO.PatchUserQueryDTO,
   ) {
+    const result = new ModelDTO.ResponseDTO();
+    const { password, name, gender, phoneNumber, email, birthday } =
+      patchUserQeuryDTO;
+
+    const findUser = this.users.find((value) => value.id === userId);
+    const payloadUser = new ModelDTO.UserDTO();
+
+    if (findUser) {
+      this.users = this.users.map((value) => {
+        if (value.id === userId) {
+          payloadUser.id = userId;
+          payloadUser.password = password ?? value.password;
+          payloadUser.name = name ?? value.name;
+          payloadUser.gender = gender ?? value.gender;
+          payloadUser.phoneNumber = phoneNumber ?? value.phoneNumber;
+          payloadUser.email = email ?? value.email;
+          payloadUser.birthday = birthday ?? value.birthday;
+
+          return payloadUser;
+        } else return value;
+      });
+
+      result.message = 'User Update Success.';
+      result.payload = payloadUser;
+    } else {
+      result.message = 'User Not Found.';
+      result.payload = null;
+    }
+
+    result.code = HttpStatus.OK;
+
+    return result;
+  }
+
+  async putUser(userId: string, putUserBodyDTO: UserDTO.PutUserBodyDTO) {
     const result = new ModelDTO.ResponseDTO();
 
     const findUser = this.users.find((value) => value.id === userId);
 
     if (findUser) {
+      const updateUser = new ModelDTO.UserDTO();
       this.users = this.users.map((value) => {
         if (value.id === userId) {
-          const updateUser = new ModelDTO.UserDTO();
-
           updateUser.id = userId;
-          updateUser.password = updateUserBodyDTO.password ?? value.password;
-          updateUser.name = updateUserBodyDTO.name ?? value.name;
-          updateUser.gender = updateUserBodyDTO.gender ?? value.gender;
-          updateUser.phoneNumber =
-            updateUserBodyDTO.phoneNumber ?? value.phoneNumber;
-          updateUser.email = updateUserBodyDTO.email ?? value.email;
-          updateUser.birthday = updateUserBodyDTO.birthday ?? value.birthday;
+          updateUser.password = putUserBodyDTO.password;
+          updateUser.name = putUserBodyDTO.name;
+          updateUser.gender = putUserBodyDTO.gender;
+          updateUser.phoneNumber = putUserBodyDTO.phoneNumber;
+          updateUser.email = putUserBodyDTO.email;
+          updateUser.birthday = putUserBodyDTO.birthday;
 
           return updateUser;
         } else return value;
       });
 
       result.message = 'User Update Success.';
+      result.payload = updateUser;
     } else {
       result.message = 'User Not Found.';
+      result.payload = null;
     }
 
     result.code = HttpStatus.OK;
-    result.payload = null;
 
     return result;
   }

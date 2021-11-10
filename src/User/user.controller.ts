@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -20,19 +21,19 @@ import * as UserDTO from 'src/dto/user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Put('user')
+  @Post('user')
   @ApiOperation({ summary: '유저 정보 생성' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',
     description: '',
   })
-  async putUser(
+  async postUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Query() query: UserDTO.PutUserReqDTO,
+    @Query() query: UserDTO.PostUserReqDTO,
   ) {
-    const result = await this.userService.putUser(
+    const result = await this.userService.postUser(
       // req.headers.authorization,
       query,
     );
@@ -41,7 +42,7 @@ export class UserController {
   }
 
   @Get('user/:userId')
-  @ApiOperation({ summary: '유저 아이디 조회' })
+  @ApiOperation({ summary: '유저 아이디로 단일 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: UserDTO.GetUserResDTO,
@@ -73,8 +74,8 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Post('user/:userId')
-  @ApiOperation({ summary: '유저 정보 업데이트' })
+  @Patch('user/:userId')
+  @ApiOperation({ summary: '유저 정보 일부 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',
@@ -85,13 +86,35 @@ export class UserController {
     type: 'string',
     description: '업데이트할 유저 아이디',
   })
-  async updateUser(
+  async patchUser(
     @Req() req: Request,
     @Res() res: Response,
     @Param('userId') userId: string,
-    @Body() body: UserDTO.UpdateUserBodyDTO,
+    @Query() query: UserDTO.PatchUserQueryDTO,
   ) {
-    const result = await this.userService.updateUser(userId, body);
+    const result = await this.userService.patchUSer(userId, query);
+    res.status(result.code).json(result);
+  }
+
+  @Put('user/:userId')
+  @ApiOperation({ summary: '유저 정보 전체 업데이트' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: '',
+    description: '',
+  })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: '업데이트할 유저 아이디',
+  })
+  async putUser(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('userId') userId: string,
+    @Body() body: UserDTO.PutUserBodyDTO,
+  ) {
+    const result = await this.userService.putUser(userId, body);
     res.status(result.code).json(result);
   }
 
