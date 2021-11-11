@@ -1,21 +1,27 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'src/entity/user.entity';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 
 @Injectable()
 export class UserService {
-  private users: ModelDTO.UserDTO[] = [];
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
   async postUser(createUserDTO: UserDTO.PostUserReqDTO) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findUser = this.users.find((value) => value.id === createUserDTO.id);
+    const findUser = await this.usersRepository.findOne(createUserDTO.id);
 
     if (findUser) {
       result.message = '[Error] Try another User Id.';
       result.payload = findUser;
     } else {
-      this.users.push(createUserDTO);
+      this.usersRepository.insert(createUserDTO);
       result.message = 'User Create Success.';
       result.payload = createUserDTO;
     }
@@ -28,7 +34,7 @@ export class UserService {
     const result = new ModelDTO.ResponseDTO();
     const user = new UserDTO.GetUserResDTO();
 
-    const findUser = this.users.find((value) => value.id === userId) ?? null;
+    const findUser = (await this.usersRepository.findOne(userId)) ?? null;
 
     if (findUser) {
       user.id = findUser.id;
@@ -56,8 +62,10 @@ export class UserService {
 
     const users = new UserDTO.GetUsersResDTO();
 
-    users.total = this.users.length;
-    users.users = this.users;
+    const findAllUsers = await this.usersRepository.findAndCount();
+
+    users.total = findAllUsers[1];
+    users.users = findAllUsers[0];
 
     result.code = HttpStatus.OK;
     result.message = '';
@@ -74,23 +82,20 @@ export class UserService {
     const { password, name, gender, phoneNumber, email, birthday } =
       patchUserQeuryDTO;
 
-    const findUser = this.users.find((value) => value.id === userId);
-    const payloadUser = new ModelDTO.UserDTO();
+    const findUser = await this.usersRepository.findOne(userId);
 
     if (findUser) {
-      this.users = this.users.map((value) => {
-        if (value.id === userId) {
-          payloadUser.id = userId;
-          payloadUser.password = password ?? value.password;
-          payloadUser.name = name ?? value.name;
-          payloadUser.gender = gender ?? value.gender;
-          payloadUser.phoneNumber = phoneNumber ?? value.phoneNumber;
-          payloadUser.email = email ?? value.email;
-          payloadUser.birthday = birthday ?? value.birthday;
+      const payloadUser = new ModelDTO.UserDTO();
 
-          return payloadUser;
-        } else return value;
-      });
+      payloadUser.id = userId;
+      payloadUser.password = password ?? findUser.password;
+      payloadUser.name = name ?? findUser.name;
+      payloadUser.gender = gender ?? findUser.gender;
+      payloadUser.phoneNumber = phoneNumber ?? findUser.phoneNumber;
+      payloadUser.email = email ?? findUser.email;
+      payloadUser.birthday = birthday ?? findUser.birthday;
+
+      await this.usersRepository.update(userId, payloadUser);
 
       result.message = 'User Update Success.';
       result.payload = payloadUser;
@@ -107,23 +112,19 @@ export class UserService {
   async putUser(userId: string, putUserBodyDTO: UserDTO.PutUserBodyDTO) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findUser = this.users.find((value) => value.id === userId);
+    const findUser = await this.usersRepository.findOne(userId);
 
     if (findUser) {
       const updateUser = new ModelDTO.UserDTO();
-      this.users = this.users.map((value) => {
-        if (value.id === userId) {
-          updateUser.id = userId;
-          updateUser.password = putUserBodyDTO?.password ?? null;
-          updateUser.name = putUserBodyDTO?.name ?? null;
-          updateUser.gender = putUserBodyDTO?.gender ?? null;
-          updateUser.phoneNumber = putUserBodyDTO?.phoneNumber ?? null;
-          updateUser.email = putUserBodyDTO?.email ?? null;
-          updateUser.birthday = putUserBodyDTO?.birthday ?? null;
+      updateUser.id = userId;
+      updateUser.password = putUserBodyDTO?.password ?? null;
+      updateUser.name = putUserBodyDTO?.name ?? null;
+      updateUser.gender = putUserBodyDTO?.gender ?? null;
+      updateUser.phoneNumber = putUserBodyDTO?.phoneNumber ?? null;
+      updateUser.email = putUserBodyDTO?.email ?? null;
+      updateUser.birthday = putUserBodyDTO?.birthday ?? null;
 
-          return updateUser;
-        } else return value;
-      });
+      await this.usersRepository.update(userId, updateUser);
 
       result.message = 'User Update Success.';
       result.payload = updateUser;
@@ -140,10 +141,10 @@ export class UserService {
   async deleteUser(userId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    const user = this.users.find((value) => value.id === userId);
+    const findUser = await this.usersRepository.findOne(userId);
 
-    if (user) {
-      this.users = this.users.filter((value) => value.id !== userId);
+    if (findUser) {
+      await this.usersRepository.delete(userId);
       result.message = 'User Delete Success.';
     } else {
       result.message = 'User Not Found.';
