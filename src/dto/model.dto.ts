@@ -51,7 +51,12 @@ export class ScheduleDTO {
   @ApiProperty({ description: '일정을 생성한 유저 아이디' })
   userId: string;
   @ApiProperty({ description: '생성 날짜 [ 2021-10-10T00:00:00 ]' })
-  dateCreated: string;
+  createdAt: string;
+  @ApiProperty({
+    description: '수정된 날짜 [ 2021-10-10T00:00:00 ]',
+    default: null,
+  })
+  updatedAt: string | null;
   @ApiProperty({ description: '일정 표시 시작날짜 [ 2021-10-10T00:00:00 ]' })
   startDate: string;
   @ApiProperty({ description: '일정 표시 종료날짜 [ 2021-10-10T00:00:00 ]' })

@@ -31,7 +31,7 @@ export class ScheduleService {
     } = postScheduleReqDTO;
 
     const schedule = new Schedule();
-    schedule.dateCreated = moment().format('YYYY-MM-DDTHH:mm:ss');
+    schedule.createdAt = moment().format('YYYY-MM-DDTHH:mm:ss');
     schedule.userId = userId;
     schedule.startDate = moment(startDate).format('YYYY-MM-DDTHH:mm:ss');
     schedule.endDate = moment(endDate).format('YYYY-MM-DDTHH:mm:ss');
@@ -123,7 +123,8 @@ export class ScheduleService {
       const updateScheduleDTO = new ModelDTO.ScheduleDTO();
       updateScheduleDTO.id = findSchedule.id;
       updateScheduleDTO.userId = findSchedule.userId;
-      updateScheduleDTO.dateCreated = moment().format('YYYY-MM-DDTHH:mm:ss');
+      updateScheduleDTO.createdAt = findSchedule.createdAt;
+      updateScheduleDTO.updatedAt = moment().format('YYYY-MM-DDTHH:mm:ss');
       updateScheduleDTO.startDate = startDate ?? findSchedule.startDate;
       updateScheduleDTO.endDate = endDate ?? findSchedule.endDate;
       updateScheduleDTO.title = title ?? findSchedule.title;

@@ -20,7 +20,9 @@ export class Schedule {
   @Column()
   userId: string;
   @Column()
-  dateCreated: string;
+  createdAt: string;
+  @Column()
+  updatedAt: string;
   @Column()
   startDate: string;
   @Column()
