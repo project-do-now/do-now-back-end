@@ -1,9 +1,15 @@
-import { Column, Entity, PrimaryColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Label } from 'src/entity/label.entity';
 
 @Entity()
 export class Schedule {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
   @Column()
   userId: string;

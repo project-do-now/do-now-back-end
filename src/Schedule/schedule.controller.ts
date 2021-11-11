@@ -37,8 +37,20 @@ export class ScheduleController {
     res.status(result.code).json(result);
   }
 
-  @Get('/:userId')
+  @Get()
   @ApiOperation({ summary: '일정 전체 조회' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ScheduleDTO.GetSchedulesResDTO,
+    description: '',
+  })
+  async getSchedules(@Req() req: Request, @Res() res: Response) {
+    const result = await this.scheduleService.getSchedules();
+    res.status(result.code).json(result);
+  }
+
+  @Get('/user/:userId')
+  @ApiOperation({ summary: '유저 아이디로 일정 복수 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: ScheduleDTO.GetSchedulesResDTO,
@@ -49,7 +61,7 @@ export class ScheduleController {
     type: 'string',
     description: '조회할 일정들을 생성한 유저 아이디',
   })
-  async getSchedules(
+  async getSchedulesByUserId(
     @Req() req: Request,
     @Res() res: Response,
     @Param('userId') userId: string,
@@ -60,7 +72,7 @@ export class ScheduleController {
   }
 
   @Get('/:scheduleId')
-  @ApiOperation({ summary: '일정 단일 조회' })
+  @ApiOperation({ summary: '일정 아이디로 일정 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: ScheduleDTO.GetScheduleResDTO,
@@ -102,7 +114,7 @@ export class ScheduleController {
     res.status(result.code).json(result);
   }
 
-  @Delete('/:userId')
+  @Delete('/user/:userId')
   @ApiOperation({ summary: '유저 아이디로 등록된 일정 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,

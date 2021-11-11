@@ -1,12 +1,19 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as ScheduleDTO from 'src/dto/schedule.dto';
+import { Schedule } from 'src/entity/schedule.entity';
+import { Repository } from 'typeorm';
 
-const moment = require('moment-timezone');
+const moment = require('moment');
 
 @Injectable()
 export class ScheduleService {
-  private schedules: ModelDTO.ScheduleDTO[] = [];
+  constructor(
+    @InjectRepository(Schedule)
+    private schedulesRepository: Repository<Schedule>,
+  ) {}
+
   private scheduleId: number = 1000;
 
   async postSchedule(postScheduleReqDTO: ScheduleDTO.PostScheduleReqDTO) {
@@ -23,8 +30,9 @@ export class ScheduleService {
       starMark,
     } = postScheduleReqDTO;
 
-    const schedule = new ModelDTO.ScheduleDTO();
+    // const schedule = new ModelDTO.ScheduleDTO();
 
+    const schedule = new Schedule();
     this.scheduleId += 1;
 
     schedule.id = this.scheduleId;
@@ -34,14 +42,15 @@ export class ScheduleService {
     schedule.endDate = moment(endDate).format('YYYY-MM-DDTHH:mm:ss');
     schedule.title = title;
     schedule.content = content ?? '';
-    schedule.invitedId = invitedId ?? [];
+    // schedule.invitedId = invitedId ?? [];
 
-    schedule.label = { color: 'purple', sticker: '' };
-    schedule.label.color = label?.color;
-    schedule.label.sticker = label?.sticker;
+    // schedule.label = { color: 'purple', sticker: '' };
+    // schedule.label.color = label?.color;
+    // schedule.label.sticker = label?.sticker;
     schedule.starMark = starMark;
+    schedule.repeatedScheduleId = null;
 
-    this.schedules.push(schedule);
+    await this.schedulesRepository.insert(schedule);
 
     result.code = HttpStatus.OK;
     result.message = 'Create Schedule Success.';
@@ -50,12 +59,27 @@ export class ScheduleService {
     return result;
   }
 
+  async getSchedules() {
+    const result = new ModelDTO.ResponseDTO();
+
+    const findUsers = await this.schedulesRepository.find();
+
+    const payload = new ScheduleDTO.GetSchedulesResDTO();
+
+    payload.total = await this.schedulesRepository.count();
+    payload.schedules = findUsers;
+
+    result.code = HttpStatus.OK;
+    result.message = '';
+    result.payload = payload;
+
+    return result;
+  }
+
   async getSchedule(scheduleId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findSchedule = this.schedules.find(
-      (value) => value.id === parseInt(scheduleId),
-    );
+    const findSchedule = await this.schedulesRepository.findOne(scheduleId);
 
     if (findSchedule) {
       result.payload = findSchedule;
@@ -73,12 +97,14 @@ export class ScheduleService {
   async getSchedulesByUserId(userId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    const schedules = this.schedules.filter((value) => value.userId === userId);
+    const schedules = await this.schedulesRepository.findAndCount({
+      where: { userId: userId },
+    });
 
     const getSchedulesResDTO = new ScheduleDTO.GetSchedulesResDTO();
 
-    getSchedulesResDTO.total = schedules.length;
-    getSchedulesResDTO.schedules = schedules;
+    getSchedulesResDTO.total = schedules[1];
+    getSchedulesResDTO.schedules = schedules[0];
 
     result.code = HttpStatus.OK;
     result.message = '';
@@ -96,29 +122,23 @@ export class ScheduleService {
     const { startDate, endDate, title, content, invitedId, label, starMark } =
       patchScheduleReqDTO;
 
-    const findSchedule = this.schedules.find(
-      (value) => value.id === parseInt(scheduleId),
-    );
+    const findSchedule = await this.schedulesRepository.findOne(scheduleId);
 
     if (findSchedule) {
       const updateScheduleDTO = new ModelDTO.ScheduleDTO();
-      this.schedules.map((value) => {
-        if (value.id === parseInt(scheduleId)) {
-          updateScheduleDTO.id = value.id;
-          updateScheduleDTO.userId = value.userId;
-          updateScheduleDTO.dateCreated = moment().format(
-            'YYYY-MM-DDTHH:mm:ss',
-          );
-          updateScheduleDTO.startDate = startDate ?? value.startDate;
-          updateScheduleDTO.endDate = endDate ?? value.endDate;
-          updateScheduleDTO.title = title ?? value.title;
-          updateScheduleDTO.content = content ?? value.content;
-          updateScheduleDTO.invitedId = invitedId ?? value.invitedId;
-          updateScheduleDTO.label = label ?? value.label;
-          updateScheduleDTO.starMark = starMark ?? value.starMark;
-          updateScheduleDTO.repeatedScheduleId = value.repeatedScheduleId;
-        } else return value;
-      });
+      updateScheduleDTO.id = findSchedule.id;
+      updateScheduleDTO.userId = findSchedule.userId;
+      updateScheduleDTO.dateCreated = moment().format('YYYY-MM-DDTHH:mm:ss');
+      updateScheduleDTO.startDate = startDate ?? findSchedule.startDate;
+      updateScheduleDTO.endDate = endDate ?? findSchedule.endDate;
+      updateScheduleDTO.title = title ?? findSchedule.title;
+      updateScheduleDTO.content = content ?? findSchedule.content;
+      // updateScheduleDTO.invitedId = invitedId ?? findSchedule.invitedId;
+      // updateScheduleDTO.label = label ?? findSchedule.label;
+      updateScheduleDTO.starMark = starMark ?? findSchedule.starMark;
+      updateScheduleDTO.repeatedScheduleId = findSchedule.repeatedScheduleId;
+
+      await this.schedulesRepository.update(scheduleId, updateScheduleDTO);
 
       result.message = 'Update Schedule Success.';
       result.payload = updateScheduleDTO;
@@ -134,12 +154,10 @@ export class ScheduleService {
   async deleteScheduleByUserId(userId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    var deletedCount = 0;
-    this.schedules.forEach((value) => {
-      if (value.userId === userId) {
-        deletedCount += 1;
-      }
+    const deletedCount = await this.schedulesRepository.findAndCount({
+      where: { userId: userId },
     });
+    await this.schedulesRepository.delete({ userId: userId });
 
     result.code = HttpStatus.OK;
     result.message = `${deletedCount} Schedules are Deleted.`;
@@ -151,9 +169,7 @@ export class ScheduleService {
   async deleteSchedule(scheduleId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    this.schedules = this.schedules.filter(
-      (value) => value.id !== parseInt(scheduleId),
-    );
+    await this.schedulesRepository.delete(scheduleId);
 
     result.code = HttpStatus.OK;
     result.message = 'Delete Success.';
