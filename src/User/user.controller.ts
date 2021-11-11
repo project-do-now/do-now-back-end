@@ -18,11 +18,11 @@ import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
-@Controller()
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('user')
+  @Post()
   @ApiOperation({ summary: '유저 정보 생성' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -42,7 +42,7 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Get('user/:userId')
+  @Get('/:userId')
   @ApiOperation({ summary: '유저 아이디로 단일 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -63,7 +63,7 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Get('users')
+  @Get()
   @ApiOperation({ summary: '유저 전체 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -75,7 +75,7 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Patch('user/:userId')
+  @Patch('/:userId')
   @ApiOperation({ summary: '유저 정보 일부 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -97,7 +97,7 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Put('user/:userId')
+  @Put('/:userId')
   @ApiOperation({ summary: '유저 정보 전체 업데이트' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -119,7 +119,7 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Delete('user/:userId')
+  @Delete('/:userId')
   @ApiOperation({ summary: '유저 아이디 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,
