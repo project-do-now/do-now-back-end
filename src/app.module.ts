@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './User/user.module';
 import { ScheduleModule } from './Schedule/schedule.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User, Schedule, Label } from 'src/entity';
+import { User, Schedule } from 'src/entity';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { User, Schedule, Label } from 'src/entity';
       username: 'root',
       password: 'alticast#',
       database: 'Donow',
-      entities: [User, Schedule, Label],
+      entities: [User, Schedule],
       migrations: ['migrations/*{.ts,.js}'],
       synchronize: false,
       autoLoadEntities: true,

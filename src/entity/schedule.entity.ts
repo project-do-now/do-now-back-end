@@ -5,7 +5,13 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
 } from 'typeorm';
-import { Label } from 'src/entity/label.entity';
+
+export class Label {
+  @Column('varchar', { default: 'purple' })
+  color: string;
+  @Column({ default: null })
+  sticker: string;
+}
 
 @Entity()
 export class Schedule {
@@ -29,6 +35,6 @@ export class Schedule {
   starMark: boolean;
   @Column({ nullable: true })
   repeatedScheduleId: number;
-  @ManyToOne((type) => Label)
+  @Column((type) => Label)
   label: Label;
 }

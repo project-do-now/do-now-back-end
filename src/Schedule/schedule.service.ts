@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as ScheduleDTO from 'src/dto/schedule.dto';
-import { Schedule } from 'src/entity/schedule.entity';
+import { Schedule } from 'src/entity';
 import { Repository } from 'typeorm';
 
 const moment = require('moment');
@@ -30,12 +30,7 @@ export class ScheduleService {
       starMark,
     } = postScheduleReqDTO;
 
-    // const schedule = new ModelDTO.ScheduleDTO();
-
     const schedule = new Schedule();
-    this.scheduleId += 1;
-
-    schedule.id = this.scheduleId;
     schedule.dateCreated = moment().format('YYYY-MM-DDTHH:mm:ss');
     schedule.userId = userId;
     schedule.startDate = moment(startDate).format('YYYY-MM-DDTHH:mm:ss');
