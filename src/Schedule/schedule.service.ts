@@ -80,7 +80,7 @@ export class ScheduleService {
       result.payload = findSchedule;
       result.message = '';
     } else {
-      result.message = 'Schedule Not Found.';
+      result.message = '[Error] Schedule Not Found.';
       result.payload = null;
     }
 
@@ -140,7 +140,7 @@ export class ScheduleService {
       result.payload = updateScheduleDTO;
     } else {
       result.payload = null;
-      result.message = 'Schedule Not Found.';
+      result.message = '[Error] Schedule Not Found.';
     }
 
     result.code = HttpStatus.OK;
