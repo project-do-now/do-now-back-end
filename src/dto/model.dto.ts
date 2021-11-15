@@ -85,3 +85,20 @@ export class ScheduleDTO {
   })
   repeatedScheduleId?: number | null;
 }
+
+export class DiaryDTO {
+  @ApiProperty({ description: '일기 아이디' })
+  id: number;
+  @ApiProperty({ description: '제목' })
+  title: string;
+  @ApiProperty({ description: '포스팅 날짜' })
+  createdAt: string;
+  @ApiProperty({ description: '수정 날짜', default: null })
+  updatedAt?: string;
+  @ApiProperty({ description: '유저 아이디' })
+  userId: string;
+  @ApiProperty({ description: '일기 내용' })
+  content: string;
+  @ApiProperty({ description: '암호 설정 여부', default: false })
+  setPassword: boolean;
+}

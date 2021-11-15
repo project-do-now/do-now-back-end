@@ -3,11 +3,13 @@ import {
   Entity,
   PrimaryColumn,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
 
 export class Label {
-  @Column('varchar', { default: 'purple' })
+  @Column({ default: 'purple' })
   color: string;
   @Column({ default: null })
   sticker: string;
@@ -19,9 +21,9 @@ export class Schedule {
   id: number;
   @Column()
   userId: string;
-  @Column()
+  @CreateDateColumn()
   createdAt: string;
-  @Column()
+  @UpdateDateColumn()
   updatedAt: string;
   @Column()
   startDate: string;
