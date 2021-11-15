@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './User/user.module';
 import { ScheduleModule } from './Schedule/schedule.module';
+import { DiaryModule } from 'src/Diary/diary.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User, Schedule } from 'src/entity';
 
@@ -8,6 +9,7 @@ import { User, Schedule } from 'src/entity';
   imports: [
     UserModule,
     ScheduleModule,
+    DiaryModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
