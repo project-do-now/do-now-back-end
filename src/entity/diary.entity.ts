@@ -9,7 +9,7 @@ import {
 @Entity()
 export class Diary {
   @PrimaryGeneratedColumn()
-  id: number = 2000;
+  id: number;
   @Column()
   title: string;
   @CreateDateColumn()

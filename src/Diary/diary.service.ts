@@ -9,27 +9,26 @@ const moment = require('moment');
 
 @Injectable()
 export class DiaryService {
+  constructor(
+    @InjectRepository(Diary)
+    private diariesRepository: Repository<Diary>,
+  ) {}
   private diary: ModelDTO.DiaryDTO[] = [];
-  private diaryId: number = 0;
 
   async postDiary(postDiaryReqDTO: DiaryDTO.PostDiaryReqDTO) {
     const result = new ModelDTO.ResponseDTO();
 
     const { userId, title, content, setPassword } = postDiaryReqDTO;
 
-    // const diary = new Diary();
-    const diary = new ModelDTO.DiaryDTO();
+    const diary = new Diary();
 
-    this.diaryId += 1;
-
-    diary.id = this.diaryId;
     diary.createdAt = moment().format('YYYY-MM-DDTHH:mm:ss');
     diary.userId = userId;
     diary.title = title;
     diary.content = content;
     diary.setPassword = setPassword;
 
-    this.diary.push(diary);
+    await this.diariesRepository.insert(diary);
 
     result.code = HttpStatus.OK;
     result.message = 'Create Schedule Success.';
@@ -43,8 +42,10 @@ export class DiaryService {
 
     const getDiariesResDTO = new DiaryDTO.GetDiariesResDTO();
 
-    getDiariesResDTO.total = this.diary.length;
-    getDiariesResDTO.diaries = this.diary;
+    const findAllDiaries = await this.diariesRepository.findAndCount();
+
+    getDiariesResDTO.total = findAllDiaries[1];
+    getDiariesResDTO.diaries = findAllDiaries[0];
 
     result.code = HttpStatus.OK;
     result.message = '';
@@ -56,15 +57,13 @@ export class DiaryService {
   async getDiary(diaryId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findDiary = this.diary.find(
-      (value) => value.id === parseInt(diaryId),
-    );
+    const findDiary = await this.diariesRepository.findOne(diaryId);
 
     if (findDiary) {
       result.message = '';
       result.payload = findDiary;
     } else {
-      result.message = 'Diary Not Found';
+      result.message = '[Error] Diary Not Found';
       result.payload = null;
     }
 
@@ -79,31 +78,25 @@ export class DiaryService {
   ) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findDiary = this.diary.find(
-      (value) => value.id === parseInt(diaryId),
-    );
+    const findDiary = await this.diariesRepository.findOne(diaryId);
 
     if (findDiary) {
       const { title, content, setPassword } = patchDiaryReqDTO;
       const updateDiary = new ModelDTO.DiaryDTO();
-      this.diary = this.diary.map((value) => {
-        if (value.id === parseInt(diaryId)) {
-          updateDiary.id = value.id;
-          updateDiary.createdAt = value.createdAt;
-          updateDiary.updatedAt = moment().format('YYYY-MM-DDTHH:mm:ss');
-          updateDiary.userId = value.userId;
-          updateDiary.title = title ?? value.title;
-          updateDiary.content = content ?? value.content;
-          updateDiary.setPassword = setPassword ?? value.setPassword;
+      updateDiary.id = findDiary.id;
+      updateDiary.createdAt = findDiary.createdAt;
+      updateDiary.updatedAt = moment().format('YYYY-MM-DDTHH:mm:ss');
+      updateDiary.userId = findDiary.userId;
+      updateDiary.title = title ?? findDiary.title;
+      updateDiary.content = content ?? findDiary.content;
+      updateDiary.setPassword = setPassword ?? findDiary.setPassword;
 
-          return updateDiary;
-        } else return value;
-      });
+      await this.diariesRepository.update(diaryId, updateDiary);
 
       result.message = 'Update Diary Success.';
       result.payload = updateDiary;
     } else {
-      result.message = 'Diary Not Found.';
+      result.message = '[Error] Diary Not Found.';
       result.payload = null;
     }
 
@@ -115,14 +108,12 @@ export class DiaryService {
   async deleteDiary(diaryId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findDiary = this.diary.find(
-      (value) => value.id === parseInt(diaryId),
-    );
+    const findDiary = await this.diariesRepository.findOne(diaryId);
     if (findDiary) {
-      this.diary = this.diary.filter((value) => value.id !== parseInt(diaryId));
+      await this.diariesRepository.delete(diaryId);
       result.message = 'Delete Diary Success.';
     } else {
-      result.message = 'Diary Not Found.';
+      result.message = '[Error] Diary Not Found.';
     }
 
     result.code = HttpStatus.OK;

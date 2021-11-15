@@ -48,7 +48,7 @@ export class UserService {
       result.message = '';
       result.payload = user;
     } else {
-      result.message = 'User Not Found.';
+      result.message = '[Error] User Not Found.';
       result.payload = null;
     }
 
@@ -100,7 +100,7 @@ export class UserService {
       result.message = 'User Update Success.';
       result.payload = payloadUser;
     } else {
-      result.message = 'User Not Found.';
+      result.message = '[Error] User Not Found.';
       result.payload = null;
     }
 
@@ -129,7 +129,7 @@ export class UserService {
       result.message = 'User Update Success.';
       result.payload = updateUser;
     } else {
-      result.message = 'User Not Found.';
+      result.message = '[Error] User Not Found.';
       result.payload = null;
     }
 
@@ -147,7 +147,7 @@ export class UserService {
       await this.usersRepository.delete(userId);
       result.message = 'User Delete Success.';
     } else {
-      result.message = 'User Not Found.';
+      result.message = '[Error] User Not Found.';
     }
 
     result.code = HttpStatus.OK;
