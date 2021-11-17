@@ -156,7 +156,7 @@ export class ScheduleService {
     await this.schedulesRepository.delete({ userId: userId });
 
     result.code = HttpStatus.OK;
-    result.message = `${deletedCount} Schedules are Deleted.`;
+    result.message = `${deletedCount[1]} Schedules are Deleted.`;
     result.payload = null;
 
     return result;
