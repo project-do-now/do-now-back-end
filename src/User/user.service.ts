@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/entity/user.entity';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -21,9 +22,12 @@ export class UserService {
       result.message = '[Error] Try another User Id.';
       result.payload = findUser;
     } else {
-      this.usersRepository.insert(createUserDTO);
+      const hashedPassword = await bcrypt.hash(createUserDTO.password, 10);
+
+      const createdUser = { ...createUserDTO, password: hashedPassword };
+      this.usersRepository.insert(createdUser);
       result.message = 'User Create Success.';
-      result.payload = createUserDTO;
+      result.payload = createdUser;
     }
 
     result.code = HttpStatus.CREATED;
