@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { Request, Response } from 'express';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as AuthDTO from 'src/dto/auth.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 
 @Controller('auth')
+@ApiTags('Auth: 로그인')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
