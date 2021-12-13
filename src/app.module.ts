@@ -4,6 +4,7 @@ import { ScheduleModule } from './Schedule/schedule.module';
 import { DiaryModule } from 'src/Diary/diary.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User, Schedule, Diary } from 'src/entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { User, Schedule, Diary } from 'src/entity';
       synchronize: false,
       autoLoadEntities: true,
     }),
+    AuthModule,
   ],
   controllers: [],
   providers: [],
