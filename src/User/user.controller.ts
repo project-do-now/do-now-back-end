@@ -14,7 +14,13 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UserService } from './user.service';
-import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
@@ -26,18 +32,11 @@ export class UserController {
   @ApiOperation({ summary: '유저 정보 생성' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: '',
+    type: ModelDTO.UserDTO,
     description: '',
   })
-  async postUser(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Query() query: UserDTO.PostUserReqDTO,
-  ) {
-    const result = await this.userService.postUser(
-      // req.headers.authorization,
-      query,
-    );
+  async postUser(@Res() res: Response, @Query() query: UserDTO.PostUserReqDTO) {
+    const result = await this.userService.postUser(query);
 
     res.status(result.code).json(result);
   }
@@ -77,6 +76,7 @@ export class UserController {
 
   @Patch('/:userId')
   @ApiOperation({ summary: '유저 정보 일부 업데이트' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: ModelDTO.UserDTO,
@@ -99,6 +99,7 @@ export class UserController {
 
   @Put('/:userId')
   @ApiOperation({ summary: '유저 정보 전체 업데이트' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: ModelDTO.UserDTO,
@@ -121,6 +122,7 @@ export class UserController {
 
   @Delete('/:userId')
   @ApiOperation({ summary: '유저 아이디 삭제' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',

@@ -5,7 +5,7 @@ import * as ScheduleDTO from 'src/dto/schedule.dto';
 import { Schedule } from 'src/entity';
 import { Repository } from 'typeorm';
 
-const moment = require('moment');
+import moment from 'moment';
 
 @Injectable()
 export class ScheduleService {
@@ -13,8 +13,6 @@ export class ScheduleService {
     @InjectRepository(Schedule)
     private schedulesRepository: Repository<Schedule>,
   ) {}
-
-  private scheduleId: number = 1000;
 
   async postSchedule(postScheduleReqDTO: ScheduleDTO.PostScheduleReqDTO) {
     const result = new ModelDTO.ResponseDTO();
@@ -50,23 +48,6 @@ export class ScheduleService {
     result.code = HttpStatus.OK;
     result.message = 'Create Schedule Success.';
     result.payload = schedule;
-
-    return result;
-  }
-
-  async getSchedules() {
-    const result = new ModelDTO.ResponseDTO();
-
-    const findUsers = await this.schedulesRepository.find();
-
-    const payload = new ScheduleDTO.GetSchedulesResDTO();
-
-    payload.total = await this.schedulesRepository.count();
-    payload.schedules = findUsers;
-
-    result.code = HttpStatus.OK;
-    result.message = '';
-    result.payload = payload;
 
     return result;
   }

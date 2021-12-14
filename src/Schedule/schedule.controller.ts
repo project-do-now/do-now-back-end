@@ -12,12 +12,19 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { ScheduleService } from './schedule.service';
-import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as ScheduleDTO from 'src/dto/schedule.dto';
 
 @ApiTags('Schedules : 일정 데이터 관리')
 @Controller('schedule')
+@ApiBearerAuth()
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
@@ -25,7 +32,7 @@ export class ScheduleController {
   @ApiOperation({ summary: '일정 생성' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: '',
+    type: ModelDTO.ScheduleDTO,
     description: '',
   })
   async postSchedule(
@@ -34,18 +41,6 @@ export class ScheduleController {
     @Query() query: ScheduleDTO.PostScheduleReqDTO,
   ) {
     const result = await this.scheduleService.postSchedule(query);
-    res.status(result.code).json(result);
-  }
-
-  @Get()
-  @ApiOperation({ summary: '일정 전체 조회' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: ScheduleDTO.GetSchedulesResDTO,
-    description: '',
-  })
-  async getSchedules(@Req() req: Request, @Res() res: Response) {
-    const result = await this.scheduleService.getSchedules();
     res.status(result.code).json(result);
   }
 

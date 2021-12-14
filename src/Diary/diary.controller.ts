@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -7,18 +6,24 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   Req,
   Res,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { DiaryService } from './diary.service';
-import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as DiaryDTO from 'src/dto/diary.dto';
 @ApiTags('Diaries : 일기 데이터 관리')
 @Controller('diary')
+@ApiBearerAuth()
 export class DiaryController {
   constructor(private readonly diaryService: DiaryService) {}
 
@@ -43,7 +48,7 @@ export class DiaryController {
   @ApiOperation({ summary: '일기 전체 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ModelDTO.DiaryDTO,
+    type: DiaryDTO.GetDiariesResDTO,
     isArray: true,
     description: '',
   })
