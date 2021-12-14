@@ -14,11 +14,18 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UserService } from './user.service';
-import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
 @Controller('user')
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -26,18 +33,11 @@ export class UserController {
   @ApiOperation({ summary: '유저 정보 생성' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: '',
+    type: ModelDTO.UserDTO,
     description: '',
   })
-  async postUser(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Query() query: UserDTO.PostUserReqDTO,
-  ) {
-    const result = await this.userService.postUser(
-      // req.headers.authorization,
-      query,
-    );
+  async postUser(@Res() res: Response, @Query() query: UserDTO.PostUserReqDTO) {
+    const result = await this.userService.postUser(query);
 
     res.status(result.code).json(result);
   }

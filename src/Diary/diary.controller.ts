@@ -14,11 +14,18 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { DiaryService } from './diary.service';
-import { ApiOperation, ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as DiaryDTO from 'src/dto/diary.dto';
 @ApiTags('Diaries : 일기 데이터 관리')
 @Controller('diary')
+@ApiBearerAuth()
 export class DiaryController {
   constructor(private readonly diaryService: DiaryService) {}
 
