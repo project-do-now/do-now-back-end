@@ -25,7 +25,6 @@ import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 @ApiTags('Users : 유저 정보')
 @Controller('user')
-@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -77,6 +76,7 @@ export class UserController {
 
   @Patch('/:userId')
   @ApiOperation({ summary: '유저 정보 일부 업데이트' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: ModelDTO.UserDTO,
@@ -99,6 +99,7 @@ export class UserController {
 
   @Put('/:userId')
   @ApiOperation({ summary: '유저 정보 전체 업데이트' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: ModelDTO.UserDTO,
@@ -121,6 +122,7 @@ export class UserController {
 
   @Delete('/:userId')
   @ApiOperation({ summary: '유저 아이디 삭제' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',

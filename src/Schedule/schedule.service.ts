@@ -52,23 +52,6 @@ export class ScheduleService {
     return result;
   }
 
-  async getSchedules() {
-    const result = new ModelDTO.ResponseDTO();
-
-    const findUsers = await this.schedulesRepository.find();
-
-    const payload = new ScheduleDTO.GetSchedulesResDTO();
-
-    payload.total = await this.schedulesRepository.count();
-    payload.schedules = findUsers;
-
-    result.code = HttpStatus.OK;
-    result.message = '';
-    result.payload = payload;
-
-    return result;
-  }
-
   async getSchedule(scheduleId: string) {
     const result = new ModelDTO.ResponseDTO();
 

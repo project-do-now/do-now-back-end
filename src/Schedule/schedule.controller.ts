@@ -44,18 +44,6 @@ export class ScheduleController {
     res.status(result.code).json(result);
   }
 
-  @Get()
-  @ApiOperation({ summary: '일정 전체 조회' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: ScheduleDTO.GetSchedulesResDTO,
-    description: '',
-  })
-  async getSchedules(@Req() req: Request, @Res() res: Response) {
-    const result = await this.scheduleService.getSchedules();
-    res.status(result.code).json(result);
-  }
-
   @Get('/user/:userId')
   @ApiOperation({ summary: '유저 아이디로 일정 복수 조회' })
   @ApiResponse({

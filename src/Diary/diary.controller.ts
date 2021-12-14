@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -7,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   Req,
   Res,
@@ -50,7 +48,7 @@ export class DiaryController {
   @ApiOperation({ summary: '일기 전체 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ModelDTO.DiaryDTO,
+    type: DiaryDTO.GetDiariesResDTO,
     isArray: true,
     description: '',
   })
