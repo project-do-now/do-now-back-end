@@ -203,8 +203,19 @@ export class UserService {
     return result;
   }
 
-  async deleteUser(userId: string) {
+  async deleteUser(accessToken: string) {
     const result = new ModelDTO.ResponseDTO();
+
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
 
     const findUser = await this.usersRepository.findOne(userId);
 

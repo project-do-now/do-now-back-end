@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { UserDTO } from './model.dto';
 
 export class UserResDTO extends OmitType(UserDTO, ['password']) {}
@@ -33,23 +33,13 @@ export class PatchUserQueryDTO {
   birthday?: string;
 }
 
-export class PutUserBodyDTO {
-  @ApiProperty({ description: '비밀번호', required: true })
-  password: string;
-  @ApiProperty({ description: '이름', required: true })
-  name: string;
-  @ApiProperty({ description: '성별 : [ 남 / 여 ]', required: true })
-  gender: string;
-  @ApiProperty({
-    description: '휴대폰 번호 : [ 000-0000-0000 ]',
-    required: true,
-  })
-  phoneNumber: string;
-  @ApiProperty({
-    description: '이메일 주소 : [ 0000@gmail.com ]',
-    required: true,
-  })
-  email: string;
-  @ApiProperty({ description: '생일 : [ 1999-01-01 ]', required: true })
-  birthday: string;
-}
+export class PutUserBodyDTO extends PartialType(
+  PickType(UserDTO, [
+    'password',
+    'name',
+    'gender',
+    'phoneNumber',
+    'email',
+    'birthday',
+  ]),
+) {}

@@ -29,7 +29,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiOperation({ summary: '유저 정보 생성' })
+  @ApiOperation({ summary: '유저 정보 생성 / 회원 가입' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: UserDTO.UserResDTO,
@@ -111,25 +111,16 @@ export class UserController {
     res.status(result.code).json(result);
   }
 
-  @Delete('/:userId')
-  @ApiOperation({ summary: '유저 아이디 삭제' })
+  @Delete()
+  @ApiOperation({ summary: '유저 삭제 / 회원 탈퇴' })
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',
     description: '',
   })
-  @ApiParam({
-    name: 'userId',
-    type: 'string',
-    description: '삭제할 유저 아이디',
-  })
-  async deleteUser(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Param('userId') userId: string,
-  ) {
-    const result = await this.userService.deleteUser(userId);
+  async deleteUser(@Req() req: Request, @Res() res: Response) {
+    const result = await this.userService.deleteUser(req.headers.authorization);
     res.status(result.code).json(result);
   }
 }
