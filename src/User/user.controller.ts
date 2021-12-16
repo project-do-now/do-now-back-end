@@ -29,10 +29,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiOperation({ summary: '유저 정보 생성' })
+  @ApiOperation({ summary: '유저 정보 생성 / 회원 가입' })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ModelDTO.UserDTO,
+    type: UserDTO.UserResDTO,
     description: '',
   })
   async postUser(@Res() res: Response, @Query() query: UserDTO.PostUserReqDTO) {
@@ -53,11 +53,7 @@ export class UserController {
     type: 'string',
     description: '조회할 유저 아이디',
   })
-  async getUser(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Param('userId') userId: string,
-  ) {
+  async getUser(@Res() res: Response, @Param('userId') userId: string) {
     const result = await this.userService.getUser(userId);
     res.status(result.code).json(result);
   }
@@ -69,76 +65,62 @@ export class UserController {
     type: UserDTO.GetUsersResDTO,
     description: '',
   })
-  async getUsers(@Req() req: Request, @Res() res: Response) {
+  async getUsers(@Res() res: Response) {
     const result = await this.userService.getUsers();
     res.status(result.code).json(result);
   }
 
-  @Patch('/:userId')
+  @Patch()
   @ApiOperation({ summary: '유저 정보 일부 업데이트' })
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ModelDTO.UserDTO,
+    type: UserDTO.UserResDTO,
     description: '',
-  })
-  @ApiParam({
-    name: 'userId',
-    type: 'string',
-    description: '업데이트할 유저 아이디',
   })
   async patchUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Param('userId') userId: string,
     @Query() query: UserDTO.PatchUserQueryDTO,
   ) {
-    const result = await this.userService.patchUSer(userId, query);
+    console.log(req.headers.authorization);
+    const result = await this.userService.patchUSer(
+      req.headers.authorization,
+      query,
+    );
     res.status(result.code).json(result);
   }
 
-  @Put('/:userId')
+  @Put()
   @ApiOperation({ summary: '유저 정보 전체 업데이트' })
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ModelDTO.UserDTO,
+    type: UserDTO.UserResDTO,
     description: '',
-  })
-  @ApiParam({
-    name: 'userId',
-    type: 'string',
-    description: '업데이트할 유저 아이디',
   })
   async putUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Param('userId') userId: string,
     @Body() body: UserDTO.PutUserBodyDTO,
   ) {
-    const result = await this.userService.putUser(userId, body);
+    const result = await this.userService.putUser(
+      req.headers.authorization,
+      body,
+    );
     res.status(result.code).json(result);
   }
 
-  @Delete('/:userId')
-  @ApiOperation({ summary: '유저 아이디 삭제' })
+  @Delete()
+  @ApiOperation({ summary: '유저 삭제 / 회원 탈퇴' })
   @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',
     description: '',
   })
-  @ApiParam({
-    name: 'userId',
-    type: 'string',
-    description: '삭제할 유저 아이디',
-  })
-  async deleteUser(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Param('userId') userId: string,
-  ) {
-    const result = await this.userService.deleteUser(userId);
+  async deleteUser(@Req() req: Request, @Res() res: Response) {
+    const result = await this.userService.deleteUser(req.headers.authorization);
     res.status(result.code).json(result);
   }
 }

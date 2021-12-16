@@ -5,6 +5,7 @@ import { User } from 'src/entity/user.entity';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
 import * as bcrypt from 'bcrypt';
+import { decodeAccessToken } from 'src/util/token.manager';
 
 @Injectable()
 export class UserService {
@@ -26,8 +27,17 @@ export class UserService {
 
       const createdUser = { ...createUserDTO, password: hashedPassword };
       this.usersRepository.insert(createdUser);
+
+      const payloadUser = new UserDTO.UserResDTO();
+      payloadUser.id = createdUser.id;
+      payloadUser.name = createdUser.name;
+      payloadUser.gender = createdUser.gender;
+      payloadUser.phoneNumber = createdUser.phoneNumber;
+      payloadUser.email = createdUser.email;
+      payloadUser.birthday = createdUser.birthday;
+
       result.message = 'User Create Success.';
-      result.payload = createdUser;
+      result.payload = payloadUser;
     }
 
     result.code = HttpStatus.CREATED;
@@ -42,7 +52,6 @@ export class UserService {
 
     if (findUser) {
       user.id = findUser.id;
-      user.password = findUser.password;
       user.name = findUser.name;
       user.gender = findUser.gender;
       user.phoneNumber = findUser.phoneNumber;
@@ -69,7 +78,15 @@ export class UserService {
     const findAllUsers = await this.usersRepository.findAndCount();
 
     users.total = findAllUsers[1];
-    users.users = findAllUsers[0];
+
+    users.users = findAllUsers[0].map((value) => ({
+      id: value.id,
+      name: value.name,
+      gender: value.gender,
+      birthday: value.birthday,
+      email: value.email,
+      phoneNumber: value.phoneNumber,
+    }));
 
     result.code = HttpStatus.OK;
     result.message = '';
@@ -79,27 +96,45 @@ export class UserService {
   }
 
   async patchUSer(
-    userId: string,
+    accessToken: string,
     patchUserQeuryDTO: UserDTO.PatchUserQueryDTO,
   ) {
     const result = new ModelDTO.ResponseDTO();
+
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
     const { password, name, gender, phoneNumber, email, birthday } =
       patchUserQeuryDTO;
+
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
     const findUser = await this.usersRepository.findOne(userId);
 
     if (findUser) {
-      const payloadUser = new ModelDTO.UserDTO();
+      const payloadUser = new UserDTO.UserResDTO();
 
       payloadUser.id = userId;
-      payloadUser.password = password ?? findUser.password;
       payloadUser.name = name ?? findUser.name;
       payloadUser.gender = gender ?? findUser.gender;
       payloadUser.phoneNumber = phoneNumber ?? findUser.phoneNumber;
       payloadUser.email = email ?? findUser.email;
       payloadUser.birthday = birthday ?? findUser.birthday;
 
-      await this.usersRepository.update(userId, payloadUser);
+      const updateUser = {
+        ...payloadUser,
+        password: hashedPassword ?? findUser.password,
+      };
+
+      await this.usersRepository.update(userId, updateUser);
 
       result.message = 'User Update Success.';
       result.payload = payloadUser;
@@ -113,25 +148,51 @@ export class UserService {
     return result;
   }
 
-  async putUser(userId: string, putUserBodyDTO: UserDTO.PutUserBodyDTO) {
+  async putUser(accessToken: string, putUserBodyDTO: UserDTO.PutUserBodyDTO) {
     const result = new ModelDTO.ResponseDTO();
+
+    const { name, gender, phoneNumber, password, email, birthday } =
+      putUserBodyDTO;
+
+    if (!name || !gender || !phoneNumber || !password || !email || !birthday) {
+      result.code = HttpStatus.BAD_REQUEST;
+      result.message = '[Error] All Parameters should be needed.';
+      result.payload = null;
+      return result;
+    }
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
 
     const findUser = await this.usersRepository.findOne(userId);
 
     if (findUser) {
-      const updateUser = new ModelDTO.UserDTO();
-      updateUser.id = userId;
-      updateUser.password = putUserBodyDTO?.password ?? null;
-      updateUser.name = putUserBodyDTO?.name ?? null;
-      updateUser.gender = putUserBodyDTO?.gender ?? null;
-      updateUser.phoneNumber = putUserBodyDTO?.phoneNumber ?? null;
-      updateUser.email = putUserBodyDTO?.email ?? null;
-      updateUser.birthday = putUserBodyDTO?.birthday ?? null;
+      const payloadUser = new UserDTO.UserResDTO();
+      payloadUser.id = userId;
+      payloadUser.name = name;
+      payloadUser.gender = gender;
+      payloadUser.phoneNumber = phoneNumber;
+      payloadUser.email = email;
+      payloadUser.birthday = birthday;
+
+      const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+
+      const updateUser = {
+        ...payloadUser,
+        password: hashedPassword,
+      };
 
       await this.usersRepository.update(userId, updateUser);
 
       result.message = 'User Update Success.';
-      result.payload = updateUser;
+      result.payload = payloadUser;
     } else {
       result.message = '[Error] User Not Found.';
       result.payload = null;
@@ -142,8 +203,19 @@ export class UserService {
     return result;
   }
 
-  async deleteUser(userId: string) {
+  async deleteUser(accessToken: string) {
     const result = new ModelDTO.ResponseDTO();
+
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
 
     const findUser = await this.usersRepository.findOne(userId);
 
