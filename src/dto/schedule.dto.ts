@@ -2,7 +2,6 @@ import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { ScheduleDTO } from 'src/dto/model.dto';
 
 export class PostScheduleReqDTO extends PickType(ScheduleDTO, [
-  'userId',
   'startDate',
   'endDate',
   'title',
