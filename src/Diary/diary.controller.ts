@@ -39,7 +39,10 @@ export class DiaryController {
     @Res() res: Response,
     @Query() query: DiaryDTO.PostDiaryReqDTO,
   ) {
-    const result = await this.diaryService.postDiary(query);
+    const result = await this.diaryService.postDiary(
+      req.headers.authorization,
+      query,
+    );
 
     res.status(result.code).json(result);
   }
@@ -53,7 +56,9 @@ export class DiaryController {
     description: '',
   })
   async getDiaries(@Req() req: Request, @Res() res: Response) {
-    const result = await this.diaryService.getDiaries();
+    const result = await this.diaryService.getDiaries(
+      req.headers.authorization,
+    );
 
     res.status(result.code).json(result);
   }
@@ -75,7 +80,10 @@ export class DiaryController {
     @Res() res: Response,
     @Param('diaryId') diaryId: string,
   ) {
-    const result = await this.diaryService.getDiary(diaryId);
+    const result = await this.diaryService.getDiary(
+      req.headers.authorization,
+      diaryId,
+    );
 
     res.status(result.code).json(result);
   }
@@ -98,7 +106,11 @@ export class DiaryController {
     @Query() query: DiaryDTO.PatchDiaryReqDTO,
     @Param('diaryId') diaryId: string,
   ) {
-    const result = await this.diaryService.patchDiary(diaryId, query);
+    const result = await this.diaryService.patchDiary(
+      req.headers.authorization,
+      diaryId,
+      query,
+    );
     res.status(result.code).json(result);
   }
 
@@ -119,7 +131,10 @@ export class DiaryController {
     @Res() res: Response,
     @Param('diaryId') diaryId: string,
   ) {
-    const result = await this.diaryService.deleteDiary(diaryId);
+    const result = await this.diaryService.deleteDiary(
+      req.headers.authorization,
+      diaryId,
+    );
 
     res.status(result.code).json(result);
   }

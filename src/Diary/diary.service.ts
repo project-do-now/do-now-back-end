@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as DiaryDTO from 'src/dto/diary.dto';
 import { Diary } from 'src/entity/diary.entity';
 import { Repository } from 'typeorm';
+import { decodeAccessToken } from 'src/util/token.manager';
 
 const moment = require('moment');
 
@@ -13,12 +15,24 @@ export class DiaryService {
     @InjectRepository(Diary)
     private diariesRepository: Repository<Diary>,
   ) {}
-  private diary: ModelDTO.DiaryDTO[] = [];
 
-  async postDiary(postDiaryReqDTO: DiaryDTO.PostDiaryReqDTO) {
+  async postDiary(
+    accessToken: string,
+    postDiaryReqDTO: DiaryDTO.PostDiaryReqDTO,
+  ) {
     const result = new ModelDTO.ResponseDTO();
+    const decodeResult = decodeAccessToken(accessToken);
 
-    const { userId, title, content, setPassword } = postDiaryReqDTO;
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
+    const { title, content, setPassword } = postDiaryReqDTO;
 
     const diary = new Diary();
 
@@ -37,12 +51,25 @@ export class DiaryService {
     return result;
   }
 
-  async getDiaries() {
+  async getDiaries(accessToken: string) {
     const result = new ModelDTO.ResponseDTO();
+
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
 
     const getDiariesResDTO = new DiaryDTO.GetDiariesResDTO();
 
-    const findAllDiaries = await this.diariesRepository.findAndCount();
+    const findAllDiaries = await this.diariesRepository.findAndCount({
+      where: { userId: userId },
+    });
 
     getDiariesResDTO.total = findAllDiaries[1];
     getDiariesResDTO.diaries = findAllDiaries[0];
@@ -54,31 +81,57 @@ export class DiaryService {
     return result;
   }
 
-  async getDiary(diaryId: string) {
+  async getDiary(accessToken: string, diaryId: string) {
     const result = new ModelDTO.ResponseDTO();
+    const decodeResult = decodeAccessToken(accessToken);
 
-    const findDiary = await this.diariesRepository.findOne(diaryId);
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
+    const findDiary = await this.diariesRepository.findOne({
+      where: { id: diaryId, userId: userId },
+    });
 
     if (findDiary) {
+      result.code = HttpStatus.OK;
       result.message = '';
       result.payload = findDiary;
     } else {
+      result.code = HttpStatus.BAD_REQUEST;
       result.message = '[Error] Diary Not Found';
       result.payload = null;
     }
-
-    result.code = HttpStatus.OK;
 
     return result;
   }
 
   async patchDiary(
+    accessToken: string,
     diaryId: string,
     patchDiaryReqDTO: DiaryDTO.PatchDiaryReqDTO,
   ) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findDiary = await this.diariesRepository.findOne(diaryId);
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
+    const findDiary = await this.diariesRepository.findOne({
+      where: { id: diaryId, userId: userId },
+    });
 
     if (findDiary) {
       const { title, content, setPassword } = patchDiaryReqDTO;
@@ -93,30 +146,43 @@ export class DiaryService {
 
       await this.diariesRepository.update(diaryId, updateDiary);
 
+      result.code = HttpStatus.OK;
       result.message = 'Update Diary Success.';
       result.payload = updateDiary;
     } else {
+      result.code = HttpStatus.BAD_REQUEST;
       result.message = '[Error] Diary Not Found.';
       result.payload = null;
     }
 
-    result.code = HttpStatus.OK;
-
     return result;
   }
 
-  async deleteDiary(diaryId: string) {
+  async deleteDiary(accessToken: string, diaryId: string) {
     const result = new ModelDTO.ResponseDTO();
+    const decodeResult = decodeAccessToken(accessToken);
 
-    const findDiary = await this.diariesRepository.findOne(diaryId);
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
+    const findDiary = await this.diariesRepository.findOne({
+      where: { id: diaryId, userId: userId },
+    });
     if (findDiary) {
       await this.diariesRepository.delete(diaryId);
+      result.code = HttpStatus.OK;
       result.message = 'Delete Diary Success.';
     } else {
+      result.code = HttpStatus.BAD_REQUEST;
       result.message = '[Error] Diary Not Found.';
     }
 
-    result.code = HttpStatus.OK;
     result.payload = null;
 
     return result;
