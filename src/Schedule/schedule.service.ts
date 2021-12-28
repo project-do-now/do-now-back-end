@@ -4,8 +4,9 @@ import * as ModelDTO from 'src/dto/model.dto';
 import * as ScheduleDTO from 'src/dto/schedule.dto';
 import { Schedule } from 'src/entity';
 import { Repository } from 'typeorm';
-
-import moment from 'moment';
+import { decodeAccessToken } from 'src/util/token.manager';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const moment = require('moment');
 
 @Injectable()
 export class ScheduleService {
@@ -14,19 +15,25 @@ export class ScheduleService {
     private schedulesRepository: Repository<Schedule>,
   ) {}
 
-  async postSchedule(postScheduleReqDTO: ScheduleDTO.PostScheduleReqDTO) {
+  async postSchedule(
+    accessToken: string,
+    postScheduleReqDTO: ScheduleDTO.PostScheduleReqDTO,
+  ) {
     const result = new ModelDTO.ResponseDTO();
 
-    const {
-      userId,
-      startDate,
-      endDate,
-      title,
-      content,
-      invitedId,
-      label,
-      starMark,
-    } = postScheduleReqDTO;
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
+    const { startDate, endDate, title, content, invitedId, label, starMark } =
+      postScheduleReqDTO;
 
     const schedule = new Schedule();
     schedule.createdAt = moment().format('YYYY-MM-DDTHH:mm:ss');
@@ -52,26 +59,50 @@ export class ScheduleService {
     return result;
   }
 
-  async getSchedule(scheduleId: string) {
+  async getSchedule(scheduleId: string, accessToken: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    const findSchedule = await this.schedulesRepository.findOne(scheduleId);
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
+    const findSchedule = await this.schedulesRepository.findOne({
+      where: { id: scheduleId, userId: userId },
+    });
 
     if (findSchedule) {
+      result.code = HttpStatus.OK;
       result.payload = findSchedule;
       result.message = '';
     } else {
+      result.code = HttpStatus.BAD_REQUEST;
       result.message = '[Error] Schedule Not Found.';
       result.payload = null;
     }
 
-    result.code = HttpStatus.OK;
-
     return result;
   }
 
-  async getSchedulesByUserId(userId: string) {
+  async getSchedules(accessToken: string) {
     const result = new ModelDTO.ResponseDTO();
+
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
 
     const schedules = await this.schedulesRepository.findAndCount({
       where: { userId: userId },
@@ -90,15 +121,29 @@ export class ScheduleService {
   }
 
   async patchSchedule(
+    accessToken: string,
     scheduleId: string,
     patchScheduleReqDTO: ScheduleDTO.PatchScheduleReqDTO,
   ) {
     const result = new ModelDTO.ResponseDTO();
 
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+
     const { startDate, endDate, title, content, invitedId, label, starMark } =
       patchScheduleReqDTO;
 
-    const findSchedule = await this.schedulesRepository.findOne(scheduleId);
+    const findSchedule = await this.schedulesRepository.findOne({
+      where: { id: scheduleId, userId: userId },
+    });
 
     if (findSchedule) {
       const updateScheduleDTO = new ModelDTO.ScheduleDTO();
@@ -117,19 +162,30 @@ export class ScheduleService {
 
       await this.schedulesRepository.update(scheduleId, updateScheduleDTO);
 
+      result.code = HttpStatus.OK;
       result.message = 'Update Schedule Success.';
       result.payload = updateScheduleDTO;
     } else {
+      result.code = HttpStatus.BAD_REQUEST;
       result.payload = null;
       result.message = '[Error] Schedule Not Found.';
     }
 
-    result.code = HttpStatus.OK;
     return result;
   }
 
-  async deleteScheduleByUserId(userId: string) {
+  async deleteScheduleByUserId(accessToken: string) {
     const result = new ModelDTO.ResponseDTO();
+    const decodeResult = decodeAccessToken(accessToken);
+
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
 
     const deletedCount = await this.schedulesRepository.findAndCount({
       where: { userId: userId },
@@ -143,13 +199,32 @@ export class ScheduleService {
     return result;
   }
 
-  async deleteSchedule(scheduleId: string) {
+  async deleteSchedule(accessToken: string, scheduleId: string) {
     const result = new ModelDTO.ResponseDTO();
 
-    await this.schedulesRepository.delete(scheduleId);
+    const decodeResult = decodeAccessToken(accessToken);
 
-    result.code = HttpStatus.OK;
-    result.message = 'Delete Success.';
+    if (!decodeResult) {
+      result.code = HttpStatus.FORBIDDEN;
+      result.message = '[Error] Token Invalid.';
+      result.payload = null;
+      return result;
+    }
+
+    const userId = decodeResult.userId;
+    const findSchedule = await this.schedulesRepository.findOne({
+      where: { id: scheduleId, userId: userId },
+    });
+
+    if (findSchedule) {
+      await this.schedulesRepository.delete(scheduleId);
+      result.code = HttpStatus.OK;
+      result.message = 'Delete Success.';
+    } else {
+      result.code = HttpStatus.BAD_REQUEST;
+      result.message = '[Error] Schedule Not Found.';
+    }
+
     result.payload = null;
 
     return result;

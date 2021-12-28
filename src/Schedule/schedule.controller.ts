@@ -40,28 +40,24 @@ export class ScheduleController {
     @Res() res: Response,
     @Query() query: ScheduleDTO.PostScheduleReqDTO,
   ) {
-    const result = await this.scheduleService.postSchedule(query);
+    const result = await this.scheduleService.postSchedule(
+      req.headers.authorization,
+      query,
+    );
     res.status(result.code).json(result);
   }
 
-  @Get('/user/:userId')
-  @ApiOperation({ summary: '유저 아이디로 일정 복수 조회' })
+  @Get()
+  @ApiOperation({ summary: '일정 복수 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: ScheduleDTO.GetSchedulesResDTO,
     description: '',
   })
-  @ApiParam({
-    name: 'userId',
-    type: 'string',
-    description: '조회할 일정들을 생성한 유저 아이디',
-  })
-  async getSchedulesByUserId(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Param('userId') userId: string,
-  ) {
-    const result = await this.scheduleService.getSchedulesByUserId(userId);
+  async getSchedules(@Req() req: Request, @Res() res: Response) {
+    const result = await this.scheduleService.getSchedules(
+      req.headers.authorization,
+    );
 
     res.status(result.code).json(result);
   }
@@ -83,7 +79,10 @@ export class ScheduleController {
     @Res() res: Response,
     @Param('scheduleId') scheduleId: string,
   ) {
-    const result = await this.scheduleService.getSchedule(scheduleId);
+    const result = await this.scheduleService.getSchedule(
+      scheduleId,
+      req.headers.authorization,
+    );
     res.status(result.code).json(result);
   }
 
@@ -105,28 +104,25 @@ export class ScheduleController {
     @Param('scheduleId') scheduleId: string,
     @Query() query: ScheduleDTO.PatchScheduleReqDTO,
   ) {
-    const result = await this.scheduleService.patchSchedule(scheduleId, query);
+    const result = await this.scheduleService.patchSchedule(
+      req.headers.authorization,
+      scheduleId,
+      query,
+    );
     res.status(result.code).json(result);
   }
 
-  @Delete('/user/:userId')
-  @ApiOperation({ summary: '유저 아이디로 등록된 일정 삭제' })
+  @Delete()
+  @ApiOperation({ summary: '등록된 일정 모두 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: '',
     description: '',
   })
-  @ApiParam({
-    name: 'userId',
-    type: 'string',
-    description: '일정 삭제하고자 하는 유저 아이디',
-  })
-  async deleteScheduleByUserId(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Param('userId') userId: string,
-  ) {
-    const result = await this.scheduleService.deleteScheduleByUserId(userId);
+  async deleteScheduleByUserId(@Req() req: Request, @Res() res: Response) {
+    const result = await this.scheduleService.deleteScheduleByUserId(
+      req.headers.authorization,
+    );
     res.status(result.code).json(result);
   }
 
@@ -147,7 +143,10 @@ export class ScheduleController {
     @Res() res: Response,
     @Param('scheduleId') scheduleId: string,
   ) {
-    const result = await this.scheduleService.deleteSchedule(scheduleId);
+    const result = await this.scheduleService.deleteSchedule(
+      req.headers.authorization,
+      scheduleId,
+    );
     res.status(result.code).json(result);
   }
 }
