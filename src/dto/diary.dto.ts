@@ -3,7 +3,6 @@ import { DiaryDTO } from 'src/dto/model.dto';
 
 export class PostDiaryReqDTO extends PickType(DiaryDTO, [
   'title',
-  'userId',
   'content',
   'setPassword',
 ]) {}
