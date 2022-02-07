@@ -21,11 +21,19 @@ import {
 } from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as DiaryDTO from 'src/dto/diary.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Log } from 'src/entity';
+import { Repository } from 'typeorm';
+import { createLog } from 'src/util/log.manager';
 @ApiTags('Diaries : 일기 데이터 관리')
 @Controller('diary')
 @ApiBearerAuth()
 export class DiaryController {
-  constructor(private readonly diaryService: DiaryService) {}
+  constructor(
+    @InjectRepository(Log)
+    private logsRepository: Repository<Log>,
+    private readonly diaryService: DiaryService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: '일기 생성' })
@@ -39,11 +47,15 @@ export class DiaryController {
     @Res() res: Response,
     @Query() query: DiaryDTO.PostDiaryReqDTO,
   ) {
+    const log = createLog(req);
+
     const result = await this.diaryService.postDiary(
       req.headers.authorization,
       query,
     );
 
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -106,11 +118,15 @@ export class DiaryController {
     @Query() query: DiaryDTO.PatchDiaryReqDTO,
     @Param('diaryId') diaryId: string,
   ) {
+    const log = createLog(req);
     const result = await this.diaryService.patchDiary(
       req.headers.authorization,
       diaryId,
       query,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -131,11 +147,14 @@ export class DiaryController {
     @Res() res: Response,
     @Param('diaryId') diaryId: string,
   ) {
+    const log = createLog(req);
     const result = await this.diaryService.deleteDiary(
       req.headers.authorization,
       diaryId,
     );
 
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 }

@@ -21,12 +21,20 @@ import {
 } from '@nestjs/swagger';
 import * as ModelDTO from 'src/dto/model.dto';
 import * as ScheduleDTO from 'src/dto/schedule.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Log } from 'src/entity';
+import { Repository } from 'typeorm';
+import { createLog } from 'src/util/log.manager';
 
 @ApiTags('Schedules : 일정 데이터 관리')
 @Controller('schedule')
 @ApiBearerAuth()
 export class ScheduleController {
-  constructor(private readonly scheduleService: ScheduleService) {}
+  constructor(
+    @InjectRepository(Log)
+    private logsRepository: Repository<Log>,
+    private readonly scheduleService: ScheduleService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: '일정 생성' })
@@ -40,10 +48,14 @@ export class ScheduleController {
     @Res() res: Response,
     @Query() query: ScheduleDTO.PostScheduleReqDTO,
   ) {
+    const log = createLog(req);
     const result = await this.scheduleService.postSchedule(
       req.headers.authorization,
       query,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -104,11 +116,15 @@ export class ScheduleController {
     @Param('scheduleId') scheduleId: string,
     @Query() query: ScheduleDTO.PatchScheduleReqDTO,
   ) {
+    const log = createLog(req);
     const result = await this.scheduleService.patchSchedule(
       req.headers.authorization,
       scheduleId,
       query,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -120,9 +136,13 @@ export class ScheduleController {
     description: '',
   })
   async deleteScheduleByUserId(@Req() req: Request, @Res() res: Response) {
+    const log = createLog(req);
     const result = await this.scheduleService.deleteScheduleByUserId(
       req.headers.authorization,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -143,10 +163,14 @@ export class ScheduleController {
     @Res() res: Response,
     @Param('scheduleId') scheduleId: string,
   ) {
+    const log = createLog(req);
     const result = await this.scheduleService.deleteSchedule(
       req.headers.authorization,
       scheduleId,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 }

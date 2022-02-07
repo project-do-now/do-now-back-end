@@ -103,3 +103,18 @@ export class DiaryDTO {
   @ApiProperty({ description: '암호 설정 여부', default: false })
   setPassword: boolean;
 }
+
+export class LogDTO {
+  @ApiProperty({ description: 'log uuid' })
+  id: number;
+  @ApiProperty({ description: 'API 호출 시간' })
+  timeStamp: string;
+  @ApiProperty({ description: 'API method' })
+  method: string;
+  @ApiProperty({ description: 'API end point' })
+  endPoint: string;
+  @ApiProperty({ description: '요청 값 json' })
+  request: string;
+  @ApiProperty({ description: '반환 값 json' })
+  response: string;
+}
