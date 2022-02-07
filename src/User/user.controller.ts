@@ -21,12 +21,20 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import * as ModelDTO from 'src/dto/model.dto';
 import * as UserDTO from 'src/dto/user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Log } from 'src/entity';
+import { Repository } from 'typeorm';
+import { createLog } from 'src/util/log.manager';
+
 @ApiTags('Users : 유저 정보')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    @InjectRepository(Log)
+    private logsRepository: Repository<Log>,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: '유저 정보 생성 / 회원 가입' })
@@ -35,8 +43,16 @@ export class UserController {
     type: UserDTO.UserResDTO,
     description: '',
   })
-  async postUser(@Res() res: Response, @Query() query: UserDTO.PostUserReqDTO) {
+  async postUser(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query() query: UserDTO.PostUserReqDTO,
+  ) {
+    const log = createLog(req);
     const result = await this.userService.postUser(query);
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
 
     res.status(result.code).json(result);
   }
@@ -83,11 +99,14 @@ export class UserController {
     @Res() res: Response,
     @Query() query: UserDTO.PatchUserQueryDTO,
   ) {
-    console.log(req.headers.authorization);
+    const log = createLog(req);
     const result = await this.userService.patchUSer(
       req.headers.authorization,
       query,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -104,10 +123,14 @@ export class UserController {
     @Res() res: Response,
     @Body() body: UserDTO.PutUserBodyDTO,
   ) {
+    const log = createLog(req);
     const result = await this.userService.putUser(
       req.headers.authorization,
       body,
     );
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 
@@ -120,7 +143,11 @@ export class UserController {
     description: '',
   })
   async deleteUser(@Req() req: Request, @Res() res: Response) {
+    const log = createLog(req);
     const result = await this.userService.deleteUser(req.headers.authorization);
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 }

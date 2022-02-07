@@ -12,11 +12,19 @@ import { Request, Response } from 'express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as AuthDTO from 'src/dto/auth.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Log } from 'src/entity';
+import { Repository } from 'typeorm';
+import { createLog } from 'src/util/log.manager';
 
 @Controller('auth')
 @ApiTags('Auth: 로그인')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    @InjectRepository(Log)
+    private logsRepository: Repository<Log>,
+    private authService: AuthService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
@@ -33,7 +41,11 @@ export class AuthController {
     @Res() res: Response,
     @Body() loginBody: AuthDTO.LoginReqDTO,
   ) {
+    const log = createLog(req);
     const result = await this.authService.login(loginBody);
+
+    log.response = JSON.stringify(result);
+    this.logsRepository.insert(log);
     res.status(result.code).json(result);
   }
 }
