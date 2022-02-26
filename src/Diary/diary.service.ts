@@ -6,8 +6,7 @@ import * as DiaryDTO from 'src/dto/diary.dto';
 import { Diary } from 'src/entity/diary.entity';
 import { Repository } from 'typeorm';
 import { decodeAccessToken } from 'src/util/token.manager';
-
-const moment = require('moment');
+import dayjs from 'dayjs';
 
 @Injectable()
 export class DiaryService {
@@ -36,7 +35,7 @@ export class DiaryService {
 
     const diary = new Diary();
 
-    diary.createdAt = moment().format('YYYY-MM-DDTHH:mm:ss');
+    diary.createdAt = dayjs().format('YYYY-MM-DDTHH:mm:ss');
     diary.userId = userId;
     diary.title = title;
     diary.content = content;
@@ -138,7 +137,7 @@ export class DiaryService {
       const updateDiary = new ModelDTO.DiaryDTO();
       updateDiary.id = findDiary.id;
       updateDiary.createdAt = findDiary.createdAt;
-      updateDiary.updatedAt = moment().format('YYYY-MM-DDTHH:mm:ss');
+      updateDiary.updatedAt = dayjs().format('YYYY-MM-DDTHH:mm:ss');
       updateDiary.userId = findDiary.userId;
       updateDiary.title = title ?? findDiary.title;
       updateDiary.content = content ?? findDiary.content;

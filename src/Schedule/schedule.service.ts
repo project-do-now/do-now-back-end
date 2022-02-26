@@ -5,8 +5,7 @@ import * as ScheduleDTO from 'src/dto/schedule.dto';
 import { Schedule } from 'src/entity';
 import { Repository } from 'typeorm';
 import { decodeAccessToken } from 'src/util/token.manager';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const moment = require('moment');
+import dayjs from 'dayjs';
 
 @Injectable()
 export class ScheduleService {
@@ -36,10 +35,10 @@ export class ScheduleService {
       postScheduleReqDTO;
 
     const schedule = new Schedule();
-    schedule.createdAt = moment().format('YYYY-MM-DDTHH:mm:ss');
+    schedule.createdAt = dayjs().format('YYYY-MM-DDTHH:mm:ss');
     schedule.userId = userId;
-    schedule.startDate = moment(startDate).format('YYYY-MM-DDTHH:mm:ss');
-    schedule.endDate = moment(endDate).format('YYYY-MM-DDTHH:mm:ss');
+    schedule.startDate = dayjs(startDate).format('YYYY-MM-DDTHH:mm:ss');
+    schedule.endDate = dayjs(endDate).format('YYYY-MM-DDTHH:mm:ss');
     schedule.title = title;
     schedule.content = content ?? '';
     // schedule.invitedId = invitedId ?? [];
@@ -150,7 +149,7 @@ export class ScheduleService {
       updateScheduleDTO.id = findSchedule.id;
       updateScheduleDTO.userId = findSchedule.userId;
       updateScheduleDTO.createdAt = findSchedule.createdAt;
-      updateScheduleDTO.updatedAt = moment().format('YYYY-MM-DDTHH:mm:ss');
+      updateScheduleDTO.updatedAt = dayjs().format('YYYY-MM-DDTHH:mm:ss');
       updateScheduleDTO.startDate = startDate ?? findSchedule.startDate;
       updateScheduleDTO.endDate = endDate ?? findSchedule.endDate;
       updateScheduleDTO.title = title ?? findSchedule.title;
